@@ -1,7 +1,12 @@
 # recurrent-mgd
 A simplified repository for training recurrent neural networks (RNNs) with multiplexed gradient descent (MGD), accompanying the paper submission "**Model-Free Multiplexed Gradient Descent: Neuromorphic Learning in Recurrent Networks**" (O'Loughlin et al. 2025).
 
-This repository is adapted from the original research repository, which is itself available upon request.  Tutorial, visualizations, and further datasets incoming soon!  For now, just try running `train.py` for quick example of recurrent-mgd in action.
+This repository is adapted from the original research repository, which is itself available upon request.  Tutorial, visualizations, and further datasets incoming soon!  For now, just try running `train.py` for quick example of recurrent-mgd in action.  
+
+### Train a recurrent network like the one vizualized below *without backprop.* 
+
+<img src="assets/image.png" style="width: 80%;" />
+
 
 ## Setup
 
