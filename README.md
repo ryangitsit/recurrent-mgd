@@ -31,6 +31,11 @@ And then (whether you have elected to utilize an virtual environment or not), th
 ```
 pip install -e .
 ```
+If you have a NVIDIA GPU with CUDA installed, then run the following command to automatically run all jax code on your GPU.
+
+```
+pip install jax[cuda12]
+```
 
 *Good to go!*
 
