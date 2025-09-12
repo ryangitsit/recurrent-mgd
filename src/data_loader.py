@@ -4,6 +4,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+from datasets import load_dataset
 
 import src.utils.helper_functions as hf
 
@@ -144,3 +145,62 @@ def get_data(dataset,norm=True,save=False):
                 pickle.dump(data, f)
 
     return data
+
+class InfiniteLoader:
+    def __init__(self, X, y, batch_size=32, shuffle=True):
+        self.X = np.array(X)
+        self.y = np.array(y)
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.indices = np.arange(len(X))
+        self.ptr = 0
+        if self.shuffle:
+            np.random.shuffle(self.indices)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.ptr + self.batch_size > len(self.X):
+            self.ptr = 0
+            if self.shuffle:
+                np.random.shuffle(self.indices)
+
+        idx = self.indices[self.ptr:self.ptr+self.batch_size]
+        self.ptr += self.batch_size
+
+        xb = jnp.array(self.X[idx])
+        yb = jnp.array(self.y[idx])
+        return xb, yb
+
+def load_mnist_in_memory(batch_size):
+    cache_dir="~/.cache/huggingface/datasets"
+
+    trainset = load_dataset("mnist", split = 'train', cache_dir = cache_dir)
+    testset  = load_dataset("mnist", split = 'test', cache_dir = cache_dir)
+
+    def preprocess(sample):
+        sample['label'] = jax.nn.one_hot(sample['label'], 10)
+        return sample
+
+    trainset = trainset.map(preprocess).shuffle(seed=0)
+    testset = testset.map(preprocess).shuffle(seed=0)
+
+    # Make datasets output in numpy format
+    trainset = trainset.with_format('numpy')
+    testset  = testset.with_format('numpy')
+
+    # Copy to memory
+    trainset = trainset[:]
+    testset  = testset[:]
+
+    trainset['image'] = np.array(trainset['image'])/255
+    testset['image']  = np.array(testset['image'])/255
+
+    trainloader = InfiniteLoader(X=trainset['image'], y=trainset['label'], batch_size=batch_size, shuffle=True)
+    testloader  = InfiniteLoader(X=testset['image'], y=testset['label'], batch_size=batch_size, shuffle=True)
+
+    return trainloader, testloader
+
+
+
